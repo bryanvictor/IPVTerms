@@ -1,0 +1,399 @@
+---
+title: "IPV Terms Analysis"
+author: "Bryan Victor"
+date: "Tuesday, January 27, 2015"
+output: pdf_document
+---
+
+
+
+```{r, echo=FALSE, comment=NA}
+library(dplyr)
+library(ggplot2)
+
+setwd("C:/Users/Tom/Documents/GitHub/IPVTerms")
+
+load("titlesearch_df.R") #titles.df
+load("titlesearch_shorttitles.R") #titles.shorttitles
+
+IPV.years<-titles.df%>%
+  filter(attributes =="YR")%>%
+  select(-attributes, articleID, Year=record)
+
+titles<-merge(titles.shorttitles, IPV.years, by="articleID")
+titles$Year<-as.character(titles$Year)
+titles$Year<-as.numeric(titles$Year)
+
+#DOMESTIC VIOLENCE
+
+DV.set<-filter(titles, grepl("domesticviolence", short.title))
+DV.set<-filter(DV.set, Year<2014)
+
+n.DV.year <- DV.set %>% 
+  group_by(Year) %>%
+  summarise(n = n())
+
+n.DV.year<-select(n.DV.year, Year, DV=n)
+
+#INTIMATE PARTNER VIOLENCE
+
+IPV.set<-filter(titles, grepl("intimatepartnerviolence", short.title))
+IPV.set<-filter(IPV.set, Year<2014)
+
+n.IPV.year <- IPV.set %>% 
+  group_by(Year) %>%
+  summarise(n = n())
+
+n.IPV.year<-select(n.IPV.year, Year, IPV=n)
+
+#FAMILY VIOLENCE
+
+FV.set<-filter(titles, grepl("familyviolence", short.title))
+FV.set<-filter(FV.set, Year<2014)
+
+n.FV.year <- FV.set %>% 
+  group_by(Year) %>%
+  summarise(n = n())
+
+n.FV.year<-select(n.FV.year, Year, FV=n)
+
+#BATTERING
+
+BAT.set<-filter(titles, grepl("battering", short.title))
+BAT.set<-filter(BAT.set, Year<2014)
+
+n.BAT.year <- BAT.set %>% 
+  group_by(Year) %>%
+  summarise(n = n())
+
+n.BAT.year<-select(n.BAT.year, Year, BAT=n)
+
+#WIFE ABUSE
+
+WA.set<-filter(titles, grepl("wifeabuse", short.title))
+WA.set<-filter(WA.set, Year<2014)
+
+n.WA.year <- WA.set %>% 
+  group_by(Year) %>%
+  summarise(n = n())
+
+n.WA.year<-select(n.WA.year, Year, WA=n)
+
+#SPOUSE ABUSE
+
+SA.set<-filter(titles, grepl("spouseabuse", short.title))
+SA.set<-filter(SA.set, Year<2014)
+
+n.SA.year <- SA.set %>% 
+  group_by(Year) %>%
+  summarise(n = n())
+
+n.SA.year<-select(n.SA.year, Year, SA=n)
+
+#PARTNER ABUSE
+
+PA.set<-filter(titles, grepl("wifeabuse", short.title))
+PA.set<-filter(PA.set, Year<2014)
+
+n.PA.year <- PA.set %>% 
+  group_by(Year) %>%
+  summarise(n = n())
+
+n.PA.year<-select(n.PA.year, Year, PA=n)
+
+#DATING VIOLENCE
+
+DATING.set<-filter(titles, grepl("datingviolence", short.title))
+DATING.set<-filter(DATING.set, Year<2014)
+
+n.DATING.year <- DATING.set %>% 
+  group_by(Year) %>%
+  summarise(n = n())
+
+n.DATING.year<-select(n.DATING.year, Year, DATING=n)
+
+#RELATIONSHIP VIOLENCE
+
+REL.set<-filter(titles, grepl("relationshipviolence", short.title))
+REL.set<-filter(REL.set, Year<2014)
+
+n.REL.year <- REL.set %>% 
+  group_by(Year) %>%
+  summarise(n = n())
+
+n.REL.year<-select(n.REL.year, Year, REL=n)
+
+#MERGER
+
+merged<-merge(n.DV.year, n.IPV.year, by="Year", all=TRUE)
+merged<-merge(merged, n.BAT.year, by="Year", all=TRUE)
+merged<-merge(merged, n.FV.year, by="Year", all=TRUE)
+merged<-merge(merged, n.WA.year, by="Year", all=TRUE)
+merged<-merge(merged, n.SA.year, by="Year", all=TRUE)
+merged<-merge(merged, n.PA.year, by="Year", all=TRUE)
+merged<-merge(merged, n.DATING.year, by="Year", all=TRUE)
+merged<-merge(merged, n.REL.year, by="Year", all=TRUE)
+merged[is.na(merged)] <- 0
+
+term.count <- ggplot(merged, aes(as.numeric(Year), y=n, group=1, color=Terms)) + 
+  geom_line(aes(y = DV, colour="Domestic Violence")) +
+  geom_line(aes(y = IPV, colour="Intimate Partner Violence")) + 
+  geom_line(aes(y = BAT, colour="Battering"))+
+  geom_line(aes(y = FV, colour="Family Violence"))+
+  geom_line(aes(y = WA, colour="Wife Abuse"))+
+  geom_line(aes(y = SA, colour="Spouse Abuse"))+
+  geom_line(aes(y = PA, colour="Partner Abuse"))+
+  geom_line(aes(y = DATING, colour="Dating Violence"))+
+  geom_line(aes(y = REL, colour="Relationship Violence"))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  xlab("Year") + 
+  ylab("Frequency") + 
+  ggtitle("") + 
+  scale_x_continuous(breaks=seq(1963, 2013, 10))
+
+print(term.count)
+
+```
+
+#Stacked Bar Chart - Titles
+
+```{r}
+
+library(reshape2)
+
+colnames(merged)<-c("Year", "domestic violence", "intimate partner violence", "battering", 
+                    "family violence", "wife abuse", "spouse abuse", "partner abuse", 
+                    "dating violence", "relationship violence")
+
+meltedmerge<-melt(merged, id.vars = "Year")
+
+colnames(meltedmerge)<-c("Year", "Term", "Frequency")
+
+ggplot(meltedmerge, aes(x = Year, y = Frequency, fill=Term)) +
+       geom_bar(stat="identity") 
+
+                                                                                    
+
+
+```
+
+#Journal Analysis by title search
+
+```{r}
+
+n.so.yr <- filter(titles.df, attributes == "SO" | attributes == "YR")
+
+n.so <- filter(titles.df, attributes == "SO") %>% mutate(title = record) %>% 
+        select(-attributes, -record)
+
+n.yr <- filter(titles.df, attributes == "YR") %>% mutate(year = record ) %>% 
+        select(-attributes, -record)
+
+n.yr<-filter(n.yr, year<=2013)
+
+n.so.yr <- merge(n.yr, n.so) %>%
+    group_by(title) %>%
+    summarise(first = min(year), last = max(year), n.to.date = n()) %>%
+    arrange(desc(n.to.date))
+
+# 10 highest number of publications
+head(n.so.yr, 15)
+
+```
+
+
+#Keyword Analysis
+
+```{r}
+load("keywordsearch_df.R")
+terms <- KW.df %>%
+  filter(attributes=="KP")
+
+years<-KW.df %>%
+  filter(attributes=="YR")%>%
+  select(articleID, year=record)
+
+years$year<-as.character(years$year)
+years$year<-as.numeric(years$year)
+
+merged<-merge(terms, years, by="articleID")
+merged<-select(merged, keyword=record, year)
+
+#DOMESTIC VIOLENCE
+
+DV.set<-filter(merged, grepl("domestic violence|Domestic Violence", keyword))
+DV.set<-filter(DV.set, year<2014)
+
+n.DV.year <- DV.set %>% 
+  group_by(year) %>%
+  summarise(n = n())
+
+n.DV.year<-select(n.DV.year, year, DV=n)
+
+#INTIMATE PARTNER VIOLENCE
+
+IPV.set<-filter(merged, grepl("intimate partner violence|Intimate Partner Violence", keyword))
+IPV.set<-filter(IPV.set, year<2014)
+
+n.IPV.year <- IPV.set %>% 
+  group_by(year) %>%
+  summarise(n = n())
+
+n.IPV.year<-select(n.IPV.year, year, IPV=n)
+
+#FAMILY VIOLENCE
+
+FV.set<-filter(merged, grepl("family violence|Family Violence", keyword))
+FV.set<-filter(FV.set, year<2014)
+
+n.FV.year <- FV.set %>% 
+  group_by(year) %>%
+  summarise(n = n())
+
+n.FV.year<-select(n.FV.year, year, FV=n)
+
+#BATTERING
+
+BAT.set<-filter(merged, grepl("batter|Batter", keyword))
+BAT.set<-filter(BAT.set, year<2014)
+
+n.BAT.year <- BAT.set %>% 
+  group_by(year) %>%
+  summarise(n = n())
+
+n.BAT.year<-select(n.BAT.year, year, BAT=n)
+
+#WIFE ABUSE
+
+WA.set<-filter(merged, grepl("wife abuse|Wife Abuse", keyword))
+WA.set<-filter(WA.set, year<2014)
+
+n.WA.year <- WA.set %>% 
+  group_by(year) %>%
+  summarise(n = n())
+
+n.WA.year<-select(n.WA.year, year, WA=n)
+
+#SPOUSE ABUSE
+
+SA.set<-filter(merged, grepl("spouse abuse|Spouse Abuse", keyword))
+SA.set<-filter(SA.set, year<2014)
+
+n.SA.year <- SA.set %>% 
+  group_by(year) %>%
+  summarise(n = n())
+
+n.SA.year<-select(n.SA.year, year, SA=n)
+
+#PARTNER ABUSE
+
+PA.set<-filter(merged, grepl("partner abuse|Partner Abuse", keyword))
+PA.set<-filter(PA.set, year<2014)
+
+n.PA.year <- PA.set %>% 
+  group_by(year) %>%
+  summarise(n = n())
+
+n.PA.year<-select(n.PA.year, year, PA=n)
+
+#DATING VIOLENCE
+
+DATING.set<-filter(merged, grepl("dating violence|Dating Violence", keyword))
+DATING.set<-filter(DATING.set, year<2014)
+
+n.DATING.year <- SA.set %>% 
+  group_by(year) %>%
+  summarise(n = n())
+
+n.DATING.year<-select(n.DATING.year, year, DATING=n)
+
+#RELATIONSHIP VIOLENCE
+
+REL.set<-filter(merged, grepl("relationship violence|Relationship Violence", keyword))
+REL.set<-filter(REL.set, year<2014)
+
+n.REL.year <- SA.set %>% 
+  group_by(year) %>%
+  summarise(n = n())
+
+n.REL.year<-select(n.REL.year, year, REL=n)
+
+KW<-merge(n.DV.year, n.IPV.year, by="year", all=TRUE)
+KW<-merge(KW, n.BAT.year, by="year", all=TRUE)
+KW<-merge(KW, n.FV.year, by="year", all=TRUE)
+KW<-merge(KW, n.WA.year, by="year", all=TRUE)
+KW<-merge(KW, n.SA.year, by="year", all=TRUE)
+KW<-merge(KW, n.PA.year, by="year", all=TRUE)
+KW<-merge(KW, n.DATING.year, by="year", all=TRUE)
+KW<-merge(KW, n.REL.year, by="year", all=TRUE)
+KW[is.na(KW)] <- 0
+
+KW.count <- ggplot(KW, aes(as.numeric(year), y=n, group=1, color=Keywords)) + 
+  geom_line(aes(y = DV, colour="Domestic Violence")) +
+  geom_line(aes(y = IPV, colour="Intimate Partner Violence")) + 
+  geom_line(aes(y = BAT, colour="Battered/Battering"))+
+  geom_line(aes(y = FV, colour="Family Violence"))+
+  geom_line(aes(y = WA, colour="Wife Abuse"))+
+  geom_line(aes(y = SA, colour="Spouse Abuse"))+
+  geom_line(aes(y = PA, colour="Partner Abuse"))+
+  geom_line(aes(y = DATING, colour="Dating Violence"))+
+  geom_line(aes(y = REL, colour="Relationship Violence"))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  xlab("Year") + 
+  ylab("Frequency") + 
+  ggtitle("") + 
+  scale_x_continuous(breaks=seq(1963, 2013, 10))
+
+print(KW.count)
+```
+
+
+#Journal Analysis by keyword search
+
+```{r}
+
+n.so.yr <- filter(KW.df, attributes == "SO" | attributes == "YR")
+
+n.so <- filter(KW.df, attributes == "SO") %>% mutate(title = record) %>% 
+        select(-attributes, -record)
+
+n.yr <- filter(KW.df, attributes == "YR") %>% mutate(year = record ) %>% 
+        select(-attributes, -record)
+
+n.yr<-filter(n.yr, year<=2013)
+
+n.so.yr <- merge(n.yr, n.so) %>%
+    group_by(title) %>%
+    summarise(first = min(year), last = max(year), n.to.date = n()) %>%
+    arrange(desc(n.to.date))
+
+# 15 highest number of publications
+head(n.so.yr, 15)
+
+```
+
+
+#Google Trend Data 
+
+```{r, echo=FALSE, comment=NA, message=FALSE}
+
+google<-read.csv("googletrend.csv")
+google$Week<-strtrim(google$Week, 10)
+google<-google[1:522,]
+google$Week<-as.Date(google$Week)
+google$domestic.violence<-as.numeric(google$domestic.violence)
+
+google.count <- ggplot(google, aes(x=Week)) + 
+  geom_line(aes(y = domestic.violence, colour="domestic violence")) +
+  geom_line(aes(y = intimate.partner.violence, colour="intimate partner violence")) + 
+  geom_line(aes(y = dating.violence, colour="dating violence"))+
+  geom_line(aes(y = family.violence, colour="family violence"))+ scale_x_date() + 
+  xlab("Year") + 
+  ylab("Google Popularity Rating")
+
+google.count<- google.count + scale_color_discrete(name="Google Search Terms")
+
+print(google.count)
+
+```
+
