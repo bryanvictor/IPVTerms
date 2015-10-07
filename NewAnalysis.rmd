@@ -5,13 +5,19 @@ date: "Tuesday, January 27, 2015"
 output: pdf_document
 ---
 
+Databases used: Anthropoligical Literature, CINAHL, Education Abstracts, ERIC, Humanities & Social Sciences Index Retrospective: 1907-1984, MEDLINE, PsycARTICLES, PsycINFO, and Social Work Abstracts
+
+Search term: "domestic violence" or "intimate partner violence" or "battering" or "family violence" or "wife abuse" or "partner abuse" or "spouse abuse" or "dating violence" or "relationship violence"
+
+Original article count: 11,897
+
 
 
 ```{r, echo=FALSE, comment=NA}
 library(dplyr)
 library(ggplot2)
 
-setwd("C:/Users/SSW/Documents/GitHub/IPVTerms")
+setwd("C:/Users/Tom/Documents/GitHub/IPVTerms")
 
 load("titlesearch_df.R") #titles.df
 load("titlesearch_shorttitles.R") #titles.shorttitles
@@ -26,7 +32,7 @@ titles$Year<-as.numeric(titles$Year)
 
 #DOMESTIC VIOLENCE
 
-DV.set<-filter(titles, grepl("domesticviolence", short.title))
+DV.set<-filter(titles, grepl("domestic violence", short.title, ignore.case=T))
 DV.set<-filter(DV.set, Year<2014)
 
 n.DV.year <- DV.set %>% 
@@ -37,7 +43,7 @@ n.DV.year<-select(n.DV.year, Year, DV=n)
 
 #INTIMATE PARTNER VIOLENCE
 
-IPV.set<-filter(titles, grepl("intimatepartnerviolence", short.title))
+IPV.set<-filter(titles, grepl("intimate\\spartner\\sviolence", short.title, ignore.case=T))
 IPV.set<-filter(IPV.set, Year<2014)
 
 n.IPV.year <- IPV.set %>% 
@@ -48,7 +54,7 @@ n.IPV.year<-select(n.IPV.year, Year, IPV=n)
 
 #FAMILY VIOLENCE
 
-FV.set<-filter(titles, grepl("familyviolence", short.title))
+FV.set<-filter(titles, grepl("family\\sviolence", short.title, ignore.case=T))
 FV.set<-filter(FV.set, Year<2014)
 
 n.FV.year <- FV.set %>% 
@@ -59,7 +65,7 @@ n.FV.year<-select(n.FV.year, Year, FV=n)
 
 #BATTERING
 
-BAT.set<-filter(titles, grepl("battering", short.title))
+BAT.set<-filter(titles, grepl("battering", short.title, ignore.case=T))
 BAT.set<-filter(BAT.set, Year<2014)
 
 n.BAT.year <- BAT.set %>% 
@@ -70,7 +76,7 @@ n.BAT.year<-select(n.BAT.year, Year, BAT=n)
 
 #WIFE ABUSE
 
-WA.set<-filter(titles, grepl("wifeabuse", short.title))
+WA.set<-filter(titles, grepl("wife\\sabuse", short.title, ignore.case=T))
 WA.set<-filter(WA.set, Year<2014)
 
 n.WA.year <- WA.set %>% 
@@ -81,7 +87,7 @@ n.WA.year<-select(n.WA.year, Year, WA=n)
 
 #SPOUSE ABUSE
 
-SA.set<-filter(titles, grepl("spouseabuse", short.title))
+SA.set<-filter(titles, grepl("spouse\\sabuse", short.title, ignore.case=T))
 SA.set<-filter(SA.set, Year<2014)
 
 n.SA.year <- SA.set %>% 
@@ -92,7 +98,7 @@ n.SA.year<-select(n.SA.year, Year, SA=n)
 
 #PARTNER ABUSE
 
-PA.set<-filter(titles, grepl("wifeabuse", short.title))
+PA.set<-filter(titles, grepl("partner\\sabuse", short.title, ignore.case=T))
 PA.set<-filter(PA.set, Year<2014)
 
 n.PA.year <- PA.set %>% 
@@ -103,7 +109,7 @@ n.PA.year<-select(n.PA.year, Year, PA=n)
 
 #DATING VIOLENCE
 
-DATING.set<-filter(titles, grepl("datingviolence", short.title))
+DATING.set<-filter(titles, grepl("dating\\sviolence", short.title, ignore.case=T))
 DATING.set<-filter(DATING.set, Year<2014)
 
 n.DATING.year <- DATING.set %>% 
@@ -114,7 +120,7 @@ n.DATING.year<-select(n.DATING.year, Year, DATING=n)
 
 #RELATIONSHIP VIOLENCE
 
-REL.set<-filter(titles, grepl("relationshipviolence", short.title))
+REL.set<-filter(titles, grepl("relationship\\sviolence", short.title, ignore.case=T))
 REL.set<-filter(REL.set, Year<2014)
 
 n.REL.year <- REL.set %>% 
